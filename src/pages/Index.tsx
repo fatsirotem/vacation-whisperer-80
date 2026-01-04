@@ -3,16 +3,18 @@ import Header from '@/components/Header';
 import AddVacationForm from '@/components/AddVacationForm';
 import VacationCalendar from '@/components/VacationCalendar';
 import VacationList from '@/components/VacationList';
+import TimelineView from '@/components/TimelineView';
+import TeamOverview from '@/components/TeamOverview';
 import StatsCards from '@/components/StatsCards';
 import TeamFilter from '@/components/TeamFilter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Vacation, ScrumTeam } from '@/types/vacation';
 import { employees } from '@/data/employees';
-import { CalendarDays, List } from 'lucide-react';
+import { CalendarDays, List, GanttChart, Users } from 'lucide-react';
 
 const Index = () => {
   const [vacations, setVacations] = useState<Vacation[]>([
-    // Sample data for demonstration
+    // Sample data - you can edit or delete these in the List View
     {
       id: '1',
       employeeId: '2',
@@ -59,6 +61,12 @@ const Index = () => {
     setVacations((prev) => prev.filter((v) => v.id !== id));
   };
 
+  const handleUpdateVacation = (updatedVacation: Vacation) => {
+    setVacations((prev) =>
+      prev.map((v) => (v.id === updatedVacation.id ? updatedVacation : v))
+    );
+  };
+
   const filteredVacations = vacations.filter((vacation) => {
     if (selectedTeam === 'all') return true;
     const employee = employees.find((e) => e.id === vacation.employeeId);
@@ -84,18 +92,38 @@ const Index = () => {
           <TeamFilter selectedTeam={selectedTeam} onSelect={setSelectedTeam} />
         </div>
 
-        <Tabs defaultValue="calendar" className="space-y-4">
-          <TabsList>
+        <Tabs defaultValue="teams" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+            <TabsTrigger value="teams" className="gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Team Overview</span>
+              <span className="sm:hidden">Teams</span>
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="gap-2">
+              <GanttChart className="h-4 w-4" />
+              <span className="hidden sm:inline">Timeline</span>
+              <span className="sm:hidden">Timeline</span>
+            </TabsTrigger>
             <TabsTrigger value="calendar" className="gap-2">
               <CalendarDays className="h-4 w-4" />
-              Calendar View
+              <span className="hidden sm:inline">Calendar</span>
+              <span className="sm:hidden">Cal</span>
             </TabsTrigger>
             <TabsTrigger value="list" className="gap-2">
               <List className="h-4 w-4" />
-              List View
+              <span className="hidden sm:inline">List View</span>
+              <span className="sm:hidden">List</span>
             </TabsTrigger>
           </TabsList>
           
+          <TabsContent value="teams" className="animate-fade-in">
+            <TeamOverview vacations={filteredVacations} />
+          </TabsContent>
+
+          <TabsContent value="timeline" className="animate-fade-in">
+            <TimelineView vacations={filteredVacations} />
+          </TabsContent>
+
           <TabsContent value="calendar" className="animate-fade-in">
             <VacationCalendar vacations={filteredVacations} />
           </TabsContent>
@@ -104,6 +132,7 @@ const Index = () => {
             <VacationList
               vacations={filteredVacations}
               onDelete={handleDeleteVacation}
+              onUpdate={handleUpdateVacation}
             />
           </TabsContent>
         </Tabs>
