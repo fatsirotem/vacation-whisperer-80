@@ -21,7 +21,7 @@ const Index = () => {
       employeeName: 'Omer Gohar',
       startDate: new Date(2026, 1, 14),
       endDate: new Date(2026, 3, 15),
-      leaveType: 'RD',
+      leaveType: 'rd',
       createdAt: new Date(),
     },
     {
