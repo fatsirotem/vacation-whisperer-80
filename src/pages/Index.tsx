@@ -19,9 +19,9 @@ const Index = () => {
       id: '1',
       employeeId: '2',
       employeeName: 'Omer Gohar',
-      startDate: new Date(2026, 0, 6),
-      endDate: new Date(2026, 0, 10),
-      leaveType: 'vacation',
+      startDate: new Date(2026, 1, 14),
+      endDate: new Date(2026, 3, 15),
+      leaveType: 'RD',
       createdAt: new Date(),
     },
     {
