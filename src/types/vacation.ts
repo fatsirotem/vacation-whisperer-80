@@ -1,4 +1,4 @@
-export type LeaveType = 'vacation' | 'parental' | 'maternity' | 'exams';
+export type LeaveType = 'vacation' | 'parental' | 'maternity' | 'exams' | 'rd';
 
 export type Role = 'DV' | 'RTL' | 'Manager - DV' | 'Manager - RTL' | 'Manager';
 

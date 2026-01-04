@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus } from 'lucide-react';
+import { CalendarIcon, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -24,36 +24,31 @@ import {
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { employees } from '@/data/employees';
 import { LeaveType, Vacation } from '@/types/vacation';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
-interface AddVacationFormProps {
-  onAdd: (vacation: Omit<Vacation, 'id' | 'createdAt'>) => void;
+interface EditVacationDialogProps {
+  vacation: Vacation;
+  onUpdate: (vacation: Vacation) => void;
 }
 
-const AddVacationForm = ({ onAdd }: AddVacationFormProps) => {
+const EditVacationDialog = ({ vacation, onUpdate }: EditVacationDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [employeeId, setEmployeeId] = useState('');
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
-  const [leaveType, setLeaveType] = useState<LeaveType>('vacation');
-  const [notes, setNotes] = useState('');
+  const [startDate, setStartDate] = useState<Date>(vacation.startDate);
+  const [endDate, setEndDate] = useState<Date>(vacation.endDate);
+  const [leaveType, setLeaveType] = useState<LeaveType>(vacation.leaveType);
+  const [notes, setNotes] = useState(vacation.notes || '');
   const { toast } = useToast();
 
-  const selectedEmployee = employees.find(e => e.id === employeeId);
+  useEffect(() => {
+    setStartDate(vacation.startDate);
+    setEndDate(vacation.endDate);
+    setLeaveType(vacation.leaveType);
+    setNotes(vacation.notes || '');
+  }, [vacation]);
 
   const handleSubmit = () => {
-    if (!employeeId || !startDate || !endDate) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please fill in all required fields.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     if (endDate < startDate) {
       toast({
         title: 'Invalid Dates',
@@ -63,9 +58,8 @@ const AddVacationForm = ({ onAdd }: AddVacationFormProps) => {
       return;
     }
 
-    onAdd({
-      employeeId,
-      employeeName: selectedEmployee?.name || '',
+    onUpdate({
+      ...vacation,
       startDate,
       endDate,
       leaveType,
@@ -73,70 +67,48 @@ const AddVacationForm = ({ onAdd }: AddVacationFormProps) => {
     });
 
     toast({
-      title: 'Vacation Added',
-      description: `Leave scheduled for ${selectedEmployee?.name}`,
+      title: 'Vacation Updated',
+      description: `Leave updated for ${vacation.employeeName}`,
     });
 
-    // Reset form
-    setEmployeeId('');
-    setStartDate(undefined);
-    setEndDate(undefined);
-    setLeaveType('vacation');
-    setNotes('');
     setOpen(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Vacation
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+        >
+          <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Schedule Employee Leave</DialogTitle>
+          <DialogTitle>Edit Leave - {vacation.employeeName}</DialogTitle>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="employee">Employee *</Label>
-            <Select value={employeeId} onValueChange={setEmployeeId}>
-              <SelectTrigger id="employee">
-                <SelectValue placeholder="Select employee" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {employees.map((employee) => (
-                  <SelectItem key={employee.id} value={employee.id}>
-                    {employee.name} ({employee.role})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label>Start Date *</Label>
+              <Label>Start Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className={cn(
-                      'justify-start text-left font-normal',
-                      !startDate && 'text-muted-foreground'
-                    )}
+                    className="justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, 'PPP') : 'Pick a date'}
+                    {format(startDate, 'PPP')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={startDate}
-                    onSelect={setStartDate}
+                    onSelect={(date) => date && setStartDate(date)}
                     initialFocus
                   />
                 </PopoverContent>
@@ -144,26 +116,23 @@ const AddVacationForm = ({ onAdd }: AddVacationFormProps) => {
             </div>
 
             <div className="grid gap-2">
-              <Label>End Date *</Label>
+              <Label>End Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className={cn(
-                      'justify-start text-left font-normal',
-                      !endDate && 'text-muted-foreground'
-                    )}
+                    className="justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, 'PPP') : 'Pick a date'}
+                    {format(endDate, 'PPP')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={endDate}
-                    onSelect={setEndDate}
-                    disabled={(date) => startDate ? date < startDate : false}
+                    onSelect={(date) => date && setEndDate(date)}
+                    disabled={(date) => date < startDate}
                     initialFocus
                   />
                 </PopoverContent>
@@ -172,7 +141,7 @@ const AddVacationForm = ({ onAdd }: AddVacationFormProps) => {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="leaveType">Leave Type *</Label>
+            <Label htmlFor="leaveType">Leave Type</Label>
             <Select value={leaveType} onValueChange={(v) => setLeaveType(v as LeaveType)}>
               <SelectTrigger id="leaveType">
                 <SelectValue />
@@ -204,7 +173,7 @@ const AddVacationForm = ({ onAdd }: AddVacationFormProps) => {
             Cancel
           </Button>
           <Button onClick={handleSubmit}>
-            Add Leave
+            Save Changes
           </Button>
         </div>
       </DialogContent>
@@ -212,4 +181,4 @@ const AddVacationForm = ({ onAdd }: AddVacationFormProps) => {
   );
 };
 
-export default AddVacationForm;
+export default EditVacationDialog;

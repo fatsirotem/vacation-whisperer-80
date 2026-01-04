@@ -23,6 +23,10 @@ const leaveTypeConfig: Record<LeaveType, { label: string; className: string }> =
     label: 'Exams', 
     className: 'bg-leave-exams text-white' 
   },
+  rd: { 
+    label: 'R&D', 
+    className: 'bg-leave-rd text-white' 
+  },
 };
 
 const LeaveBadge = ({ type, className }: LeaveBadgeProps) => {

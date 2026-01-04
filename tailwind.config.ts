@@ -78,6 +78,7 @@ export default {
           parental: "hsl(var(--leave-parental))",
           maternity: "hsl(var(--leave-maternity))",
           exams: "hsl(var(--leave-exams))",
+          rd: "hsl(var(--leave-rd))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

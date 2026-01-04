@@ -19,6 +19,7 @@ const leaveColors: Record<LeaveType, string> = {
   parental: 'bg-leave-parental',
   maternity: 'bg-leave-maternity',
   exams: 'bg-leave-exams',
+  rd: 'bg-leave-rd',
 };
 
 const VacationCalendar = ({ vacations }: VacationCalendarProps) => {
