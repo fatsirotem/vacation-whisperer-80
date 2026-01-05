@@ -11,11 +11,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Vacation, Employee } from '@/types/vacation';
 import LeaveBadge from './LeaveBadge';
-import EditVacationDialog from './EditVacationDialog';
 
 interface VacationListProps {
   vacations: Vacation[];
-  employees: Employee[]; // Add this prop
+  employees: Employee[]; // Data now comes from Supabase via props
   onDelete: (id: string) => void;
   onUpdate: (vacation: Vacation) => void;
 }
@@ -25,7 +24,6 @@ const VacationList = ({ vacations, employees, onDelete, onUpdate }: VacationList
     (a, b) => a.startDate.getTime() - b.startDate.getTime()
   );
 
-  // We find employee details from the list passed down from the database
   const getEmployeeDetails = (employeeId: string) => {
     return employees.find((e) => e.id === employeeId);
   };
@@ -54,25 +52,34 @@ const VacationList = ({ vacations, employees, onDelete, onUpdate }: VacationList
           {sortedVacations.map((vacation, index) => {
             const employee = getEmployeeDetails(vacation.employeeId);
             return (
-              <TableRow key={vacation.id} className={index % 2 === 1 ? 'bg-table-row-alt' : ''}>
+              <TableRow
+                key={vacation.id}
+                className={index % 2 === 1 ? 'bg-table-row-alt' : ''}
+              >
                 <TableCell className="font-medium">
-                  {vacation.employeeName}
-                  {employee && <span className="text-xs text-muted-foreground ml-2">({employee.role})</span>}
+                  <div>
+                    <span>{vacation.employeeName}</span>
+                    {employee && (
+                      <span className="text-xs text-muted-foreground ml-2">
+                        ({employee.role})
+                      </span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>{format(vacation.startDate, 'MMM d, yyyy')}</TableCell>
                 <TableCell>{format(vacation.endDate, 'MMM d, yyyy')}</TableCell>
-                <TableCell><LeaveBadge type={vacation.leaveType} /></TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(vacation.id)}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <LeaveBadge type={vacation.leaveType} />
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(vacation.id)}
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             );
