@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from "@/lib/supabase";
 import Header from '@/components/Header';
 import AddVacationForm from '@/components/AddVacationForm';
 import VacationCalendar from '@/components/VacationCalendar';
