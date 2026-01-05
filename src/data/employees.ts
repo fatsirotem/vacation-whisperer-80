@@ -18,7 +18,7 @@ export const employees: Employee[] = [
   { id: '15', name: 'Idan Yaniv', role: 'RTL', scrumTeams: ['PTB - GSNB', 'LLU'] },
   { id: '16', name: 'Tal Frimer', role: 'RTL', scrumTeams: ['LLU', 'PTB - GSNB'] },
   { id: '17', name: 'Neta Gadot', role: 'RTL', scrumTeams: ['LLU', 'PTB - GSNB'] },
-  { id: '18', name: 'Tomer Apel', role: 'Manager - DV', scrumTeams: ['PTB - GSNB', 'Port Cluster] },
+  { id: '18', name: 'Tomer Apel', role: 'Manager - DV', scrumTeams: ['PTB - GSNB', 'Port Cluster'] },
   { id: '19', name: 'Kfir Golan', role: 'DV', scrumTeams: ['PTB - GSNB'] },
   { id: '20', name: 'Yuval Levy', role: 'DV', scrumTeams: ['PTB - GSNB'] },
   { id: '21', name: 'Maor Naftali', role: 'DV', scrumTeams: ['PTB - GSNB'] },
