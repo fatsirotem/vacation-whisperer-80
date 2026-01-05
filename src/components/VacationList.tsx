@@ -9,22 +9,23 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Vacation } from '@/types/vacation';
+import { Vacation, Employee } from '@/types/vacation';
 import LeaveBadge from './LeaveBadge';
 import EditVacationDialog from './EditVacationDialog';
-import { employees } from '@/data/employees';
 
 interface VacationListProps {
   vacations: Vacation[];
+  employees: Employee[]; // Add this prop
   onDelete: (id: string) => void;
   onUpdate: (vacation: Vacation) => void;
 }
 
-const VacationList = ({ vacations, onDelete, onUpdate }: VacationListProps) => {
+const VacationList = ({ vacations, employees, onDelete, onUpdate }: VacationListProps) => {
   const sortedVacations = [...vacations].sort(
     (a, b) => a.startDate.getTime() - b.startDate.getTime()
   );
 
+  // We find employee details from the list passed down from the database
   const getEmployeeDetails = (employeeId: string) => {
     return employees.find((e) => e.id === employeeId);
   };
@@ -33,9 +34,6 @@ const VacationList = ({ vacations, onDelete, onUpdate }: VacationListProps) => {
     return (
       <div className="bg-card rounded-lg border shadow-sm p-8 text-center">
         <p className="text-muted-foreground">No vacations scheduled yet.</p>
-        <p className="text-sm text-muted-foreground mt-1">
-          Use the "Add Vacation" button to schedule employee leave.
-        </p>
       </div>
     );
   }
@@ -46,11 +44,9 @@ const VacationList = ({ vacations, onDelete, onUpdate }: VacationListProps) => {
         <TableHeader>
           <TableRow className="bg-table-header hover:bg-table-header">
             <TableHead className="text-header-foreground font-semibold">Employee</TableHead>
-            <TableHead className="text-header-foreground font-semibold">Team(s)</TableHead>
             <TableHead className="text-header-foreground font-semibold">Start Date</TableHead>
             <TableHead className="text-header-foreground font-semibold">End Date</TableHead>
             <TableHead className="text-header-foreground font-semibold">Type</TableHead>
-            <TableHead className="text-header-foreground font-semibold">Notes</TableHead>
             <TableHead className="text-header-foreground font-semibold w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -58,48 +54,21 @@ const VacationList = ({ vacations, onDelete, onUpdate }: VacationListProps) => {
           {sortedVacations.map((vacation, index) => {
             const employee = getEmployeeDetails(vacation.employeeId);
             return (
-              <TableRow
-                key={vacation.id}
-                className={index % 2 === 1 ? 'bg-table-row-alt' : ''}
-              >
+              <TableRow key={vacation.id} className={index % 2 === 1 ? 'bg-table-row-alt' : ''}>
                 <TableCell className="font-medium">
-                  <div>
-                    <span>{vacation.employeeName}</span>
-                    {employee && (
-                      <span className="text-xs text-muted-foreground ml-2">
-                        ({employee.role})
-                      </span>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {employee?.scrumTeams.map((team) => (
-                      <span
-                        key={team}
-                        className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-secondary text-secondary-foreground"
-                      >
-                        {team}
-                      </span>
-                    ))}
-                  </div>
+                  {vacation.employeeName}
+                  {employee && <span className="text-xs text-muted-foreground ml-2">({employee.role})</span>}
                 </TableCell>
                 <TableCell>{format(vacation.startDate, 'MMM d, yyyy')}</TableCell>
                 <TableCell>{format(vacation.endDate, 'MMM d, yyyy')}</TableCell>
-                <TableCell>
-                  <LeaveBadge type={vacation.leaveType} />
-                </TableCell>
-                <TableCell className="max-w-[200px] truncate text-muted-foreground">
-                  {vacation.notes || '-'}
-                </TableCell>
+                <TableCell><LeaveBadge type={vacation.leaveType} /></TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <EditVacationDialog vacation={vacation} onUpdate={onUpdate} />
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => onDelete(vacation.id)}
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
