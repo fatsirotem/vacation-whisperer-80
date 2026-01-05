@@ -14,10 +14,9 @@ import { employees as initialEmployees } from '@/data/employees';
 import { CalendarDays, List, GanttChart, Users, Database } from 'lucide-react';
 
 const Index = () => {
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
-  const [vacations, setVacations] = useState<Vacation[]>(
-    // Sample data - you can edit or delete these in the List View
-  );
+  // Add "|| []" to ensure it never stays undefined
+  const [employees, setEmployees] = useState<Employee[]>(initialEmployees || []);
+  const [vacations, setVacations] = useState<Vacation[]>(initialVacations || []);
 
   const [selectedTeam, setSelectedTeam] = useState<ScrumTeam | 'all'>('all');
 
