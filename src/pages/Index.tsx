@@ -20,42 +20,33 @@ const Index = () => {
   const [selectedTeam, setSelectedTeam] = useState<ScrumTeam | 'all'>('all');
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- 1. LOAD DATA FROM SUPABASE ---
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Get Employees
       const { data: empData } = await supabase.from('employees').select('*').order('name');
       if (empData) setEmployees(empData);
 
-      // Get Vacations
       const { data: vacData } = await supabase.from('vacations').select('*');
       if (vacData) {
-        // We map database fields to our code's expected format (Dates must be converted from strings)
-        const formattedVacations = vacData.map(v => ({
+        const formatted = vacData.map(v => ({
           ...v,
           employeeId: v.employee_id,
           employeeName: v.employee_name,
           startDate: new Date(v.start_date),
           endDate: new Date(v.end_date),
-          leaveType: v.leave_type,
-          createdAt: new Date(v.created_at)
+          leaveType: v.leave_type
         }));
-        setVacations(formattedVacations);
+        setVacations(formatted);
       }
     } catch (error) {
-      console.error("Error loading data:", error);
-      toast.error("Failed to sync with cloud.");
+      console.error("Sync error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  // --- 2. ADD VACATION TO SUPABASE ---
   const handleAddVacation = async (vacation: Omit<Vacation, 'id' | 'createdAt'>) => {
     const { error } = await supabase.from('vacations').insert([{
       employee_id: vacation.employeeId,
@@ -65,73 +56,42 @@ const Index = () => {
       leave_type: vacation.leaveType,
       notes: vacation.notes
     }]);
-
-    if (error) {
-      toast.error("Save failed: " + error.message);
-    } else {
-      toast.success("Vacation saved to cloud!");
-      fetchData(); // Refresh local state
-    }
+    if (error) toast.error(error.message);
+    else { toast.success("Saved!"); fetchData(); }
   };
 
-  // --- 3. DELETE FROM SUPABASE ---
-  const handleDeleteVacation = async (id: string) => {
-    const { error } = await supabase.from('vacations').delete().eq('id', id);
-    if (!error) {
-      toast.success("Vacation removed");
-      fetchData();
-    }
-  };
-
-  if (isLoading) return (
-    <div className="flex h-screen items-center justify-center bg-background text-muted-foreground animate-pulse">
-      Connecting to Supabase...
-    </div>
-  );
-
-  const filteredVacations = vacations.filter((vacation) => {
+  const filteredVacations = vacations.filter((v) => {
     if (selectedTeam === 'all') return true;
-    const employee = employees.find((e) => e.id === vacation.employeeId);
-    return employee?.scrumTeams.includes(selectedTeam) || employee?.scrumTeams.includes('All');
+    const emp = employees.find((e) => e.id === v.employeeId);
+    return emp?.scrumTeams.includes(selectedTeam) || emp?.scrumTeams.includes('All');
   });
+
+  if (isLoading) return <div className="flex h-screen items-center justify-center">Loading Cloud Data...</div>;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Dashboard</h2>
-            <p className="text-muted-foreground">Live Team Tracking</p>
-          </div>
-          <AddVacationForm onAdd={handleAddVacation} />
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Dashboard</h2>
+          <AddVacationForm onAdd={handleAddVacation} employees={employees} />
         </div>
-
         <StatsCards vacations={vacations} />
         <TeamFilter selectedTeam={selectedTeam} onSelect={setSelectedTeam} />
-
         <Tabs defaultValue="teams" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="teams" className="gap-2"><Users className="h-4 w-4" />Teams</TabsTrigger>
-            <TabsTrigger value="timeline" className="gap-2"><GanttChart className="h-4 w-4" />Timeline</TabsTrigger>
-            <TabsTrigger value="calendar" className="gap-2"><CalendarDays className="h-4 w-4" />Calendar</TabsTrigger>
-            <TabsTrigger value="list" className="gap-2"><List className="h-4 w-4" />List</TabsTrigger>
-            <TabsTrigger value="employees" className="gap-2"><Database className="h-4 w-4" />Database</TabsTrigger>
+            <TabsTrigger value="teams"><Users className="h-4 w-4" /> Teams</TabsTrigger>
+            <TabsTrigger value="timeline"><GanttChart className="h-4 w-4" /> Timeline</TabsTrigger>
+            <TabsTrigger value="calendar"><CalendarDays className="h-4 w-4" /> Calendar</TabsTrigger>
+            <TabsTrigger value="list"><List className="h-4 w-4" /> List</TabsTrigger>
+            <TabsTrigger value="employees"><Database className="h-4 w-4" /> Database</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="teams"><TeamOverview vacations={filteredVacations} /></TabsContent>
-          <TabsContent value="timeline"><TimelineView vacations={filteredVacations} /></TabsContent>
+          <TabsContent value="teams"><TeamOverview vacations={filteredVacations} employees={employees} /></TabsContent>
+          <TabsContent value="timeline"><TimelineView vacations={filteredVacations} employees={employees} /></TabsContent>
           <TabsContent value="calendar"><VacationCalendar vacations={filteredVacations} /></TabsContent>
-          <TabsContent value="list">
-            <VacationList vacations={filteredVacations} onDelete={handleDeleteVacation} onUpdate={fetchData} />
-          </TabsContent>
+          <TabsContent value="list"><VacationList vacations={filteredVacations} onDelete={fetchData} onUpdate={fetchData} /></TabsContent>
           <TabsContent value="employees">
-            <EmployeeManagement 
-              employees={employees} 
-              onUpdateEmployee={fetchData} 
-              onDeleteEmployee={fetchData} 
-              onAddEmployee={fetchData} 
-            />
+            <EmployeeManagement employees={employees} onUpdateEmployee={fetchData} onDeleteEmployee={fetchData} onAddEmployee={fetchData} />
           </TabsContent>
         </Tabs>
       </main>
