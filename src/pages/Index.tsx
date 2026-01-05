@@ -89,7 +89,12 @@ const Index = () => {
           <TabsContent value="teams"><TeamOverview vacations={filteredVacations} employees={employees} /></TabsContent>
           <TabsContent value="timeline"><TimelineView vacations={filteredVacations} employees={employees} /></TabsContent>
           <TabsContent value="calendar"><VacationCalendar vacations={filteredVacations} /></TabsContent>
-          <TabsContent value="list"><VacationList vacations={filteredVacations} onDelete={fetchData} onUpdate={fetchData} /></TabsContent>
+          <TabsContent value="list"><VacationList 
+  vacations={filteredVacations} 
+  employees={employees} // Add this line
+  onDelete={handleDeleteVacation} 
+  onUpdate={fetchData} 
+/>
           <TabsContent value="employees">
             <EmployeeManagement employees={employees} onUpdateEmployee={fetchData} onDeleteEmployee={fetchData} onAddEmployee={fetchData} />
           </TabsContent>
