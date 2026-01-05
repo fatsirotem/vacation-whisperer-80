@@ -86,23 +86,36 @@ const Index = () => {
             <TabsTrigger value="list"><List className="h-4 w-4" /> List</TabsTrigger>
             <TabsTrigger value="employees"><Database className="h-4 w-4" /> Database</TabsTrigger>
           </TabsList>
-          <TabsContent value="teams"><TeamOverview vacations={filteredVacations} employees={employees} /></TabsContent>
-          <TabsContent value="timeline"><TimelineView vacations={filteredVacations} employees={employees} /></TabsContent>
-          <TabsContent value="calendar"><VacationCalendar vacations={filteredVacations} /></TabsContent>
-          <TabsContent value="list"><VacationList 
-  vacations={filteredVacations} 
-  employees={employees} // Add this line
-  onDelete={handleDeleteVacation} 
-  onUpdate={fetchData} 
-/>
+
+          <TabsContent value="teams">
+            <TeamOverview vacations={filteredVacations} employees={employees} />
+          </TabsContent>
+          
+          <TabsContent value="timeline">
+            <TimelineView vacations={filteredVacations} employees={employees} />
+          </TabsContent>
+          
+          <TabsContent value="calendar">
+            <VacationCalendar vacations={filteredVacations} />
+          </TabsContent>
+          
           <TabsContent value="list">
-  <VacationList 
-    vacations={filteredVacations} 
-    employees={employees} 
-    onDelete={handleDeleteVacation} 
-    onUpdate={fetchData} 
-  />
-</TabsContent>
+            <VacationList 
+              vacations={filteredVacations} 
+              employees={employees} 
+              onDelete={handleDeleteVacation} 
+              onUpdate={fetchData} 
+            />
+          </TabsContent>
+
+          <TabsContent value="employees">
+            <EmployeeManagement 
+              employees={employees} 
+              onUpdateEmployee={fetchData} 
+              onDeleteEmployee={fetchData} 
+              onAddEmployee={fetchData} 
+            />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
