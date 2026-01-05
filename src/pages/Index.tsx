@@ -95,9 +95,14 @@ const Index = () => {
   onDelete={handleDeleteVacation} 
   onUpdate={fetchData} 
 />
-          <TabsContent value="employees">
-            <EmployeeManagement employees={employees} onUpdateEmployee={fetchData} onDeleteEmployee={fetchData} onAddEmployee={fetchData} />
-          </TabsContent>
+          <TabsContent value="list">
+  <VacationList 
+    vacations={filteredVacations} 
+    employees={employees} 
+    onDelete={handleDeleteVacation} 
+    onUpdate={fetchData} 
+  />
+</TabsContent>
         </Tabs>
       </main>
     </div>
