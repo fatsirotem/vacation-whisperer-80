@@ -17,35 +17,6 @@ const Index = () => {
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [vacations, setVacations] = useState<Vacation[]>([
     // Sample data - you can edit or delete these in the List View
-    {
-      id: '1',
-      employeeId: '2',
-      employeeName: 'Omer Gohar',
-      startDate: new Date(2026, 1, 14),
-      endDate: new Date(2026, 3, 15),
-      leaveType: 'rd',
-      createdAt: new Date(),
-    },
-    {
-      id: '2',
-      employeeId: '13',
-      employeeName: 'Shay Dahan',
-      startDate: new Date(2026, 0, 12),
-      endDate: new Date(2026, 0, 16),
-      leaveType: 'exams',
-      notes: 'Final exams period',
-      createdAt: new Date(),
-    },
-    {
-      id: '3',
-      employeeId: '5',
-      employeeName: 'Matan Bahat',
-      startDate: new Date(2026, 0, 20),
-      endDate: new Date(2026, 2, 20),
-      leaveType: 'parental',
-      notes: 'Parental leave - 2 months',
-      createdAt: new Date(),
-    },
   ]);
 
   const [selectedTeam, setSelectedTeam] = useState<ScrumTeam | 'all'>('all');
