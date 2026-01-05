@@ -14,7 +14,7 @@ import LeaveBadge from './LeaveBadge';
 
 interface VacationListProps {
   vacations: Vacation[];
-  employees: Employee[]; // Data now comes from Supabase via props
+  employees: Employee[]; 
   onDelete: (id: string) => void;
   onUpdate: (vacation: Vacation) => void;
 }
