@@ -16,7 +16,7 @@ import { CalendarDays, List, GanttChart, Users, Database } from 'lucide-react';
 const Index = () => {
   // Add "|| []" to ensure it never stays undefined
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees || []); 
-  const [vacations, setVacations] = useState<Vacation[]>(initialVacations || []);
+  
   const [vacations, setVacations] = useState<Vacation[]>([
     {
       id: '1',
