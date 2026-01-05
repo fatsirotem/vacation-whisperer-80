@@ -13,6 +13,31 @@ import { Vacation, ScrumTeam, Employee } from '@/types/vacation';
 import { employees as initialEmployees } from '@/data/employees';
 import { CalendarDays, List, GanttChart, Users, Database } from 'lucide-react';
 
+import { supabase } from '@/lib/supabase'; // Make sure you created this file
+import { employees as initialEmployees } from '@/data/employees';
+
+// Inside your Index component:
+const migrateData = async () => {
+  const { data, error } = await supabase
+    .from('employees')
+    .insert(initialEmployees.map(emp => ({
+      id: emp.id, // Keeping your existing IDs
+      name: emp.name,
+      role: emp.role,
+      scrum_teams: emp.scrumTeams
+    })));
+
+  if (error) {
+    console.error('Migration failed:', error);
+    alert('Error: ' + error.message);
+  } else {
+    alert('Success! 30 employees uploaded to Supabase.');
+  }
+};
+
+// Add this button somewhere in your HTML return just to click it once:
+<button onClick={migrateData}>MIGRATE EMPLOYEES TO CLOUD</button>
+
 const Index = () => {
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees || []);
   const [vacations, setVacations] = useState<Vacation[]>([]);
