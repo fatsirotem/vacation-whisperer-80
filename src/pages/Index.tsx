@@ -23,21 +23,22 @@ const Index = () => {
 
   // --- MIGRATION LOGIC ---
   const migrateData = async () => {
-    const { error } = await supabase
-      .from('employees')
-      .upsert(initialEmployees.map(emp => ({
-        id: emp.id,
-        name: emp.name,
-        role: emp.role,
-        scrum_teams: emp.scrumTeams
-      })));
+  const { error } = await supabase
+    .from('employees')
+    .insert(initialEmployees.map(emp => ({
+      // DO NOT include id: emp.id here. 
+      // Supabase will automatically generate a fresh UUID for everyone.
+      name: emp.name,
+      role: emp.role,
+      scrumTeams: emp.scrumTeams 
+    })));
 
-    if (error) {
-      toast.error('Migration failed: ' + error.message);
-    } else {
-      toast.success('Success! Employees synced to Supabase.');
-    }
-  };
+  if (error) {
+    toast.error('Migration failed: ' + error.message);
+  } else {
+    toast.success('Success! 30 employees uploaded.');
+  }
+};
 
   // --- DATA LOADING ---
   useEffect(() => {
