@@ -12,99 +12,81 @@ import TeamFilter from '@/components/TeamFilter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Vacation, ScrumTeam, Employee } from '@/types/vacation';
 import { employees as initialEmployees } from '@/data/employees';
-import { CalendarDays, List, GanttChart, Users, Database } from 'lucide-react';
-
-import { supabase } from '@/lib/supabase'; // Make sure you created this file
-import { employees as initialEmployees } from '@/data/employees';
-
-// Inside your Index component:
-const migrateData = async () => {
-  const { data, error } = await supabase
-    .from('employees')
-    .insert(initialEmployees.map(emp => ({
-      id: emp.id, // Keeping your existing IDs
-      name: emp.name,
-      role: emp.role,
-      scrum_teams: emp.scrumTeams
-    })));
-
-  if (error) {
-    console.error('Migration failed:', error);
-    alert('Error: ' + error.message);
-  } else {
-    alert('Success! 30 employees uploaded to Supabase.');
-  }
-};
-
-// Add this button somewhere in your HTML return just to click it once:
-<button onClick={migrateData}>MIGRATE EMPLOYEES TO CLOUD</button>
+import { CalendarDays, List, GanttChart, Users, Database, CloudUpload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees || []);
   const [vacations, setVacations] = useState<Vacation[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<ScrumTeam | 'all'>('all');
 
-  // Load vacations from localStorage once on client
+  // --- MIGRATION LOGIC ---
+  const migrateData = async () => {
+    const { error } = await supabase
+      .from('employees')
+      .upsert(initialEmployees.map(emp => ({
+        id: emp.id,
+        name: emp.name,
+        role: emp.role,
+        scrum_teams: emp.scrumTeams
+      })));
+
+    if (error) {
+      toast.error('Migration failed: ' + error.message);
+    } else {
+      toast.success('Success! Employees synced to Supabase.');
+    }
+  };
+
+  // --- DATA LOADING ---
   useEffect(() => {
+    // Load from localStorage as backup/initial state
     try {
-      const saved = typeof window !== 'undefined' ? localStorage.getItem('vacations') : null;
+      const saved = localStorage.getItem('vacations');
       if (saved) {
         setVacations(JSON.parse(saved));
       }
     } catch (e) {
-      console.error('Failed to load vacations from localStorage', e);
+      console.error('Failed to load local vacations', e);
     }
   }, []);
 
-  // Persist vacations to localStorage whenever they change
-  useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('vacations', JSON.stringify(vacations));
-      }
-    } catch (e) {
-      console.error('Failed to save vacations to localStorage', e);
-    }
-  }, [vacations]);
-
-  const [selectedTeam, setSelectedTeam] = useState<ScrumTeam | 'all'>('all');
-
+  // --- CRUD HANDLERS ---
   const handleAddVacation = (vacation: Omit<Vacation, 'id' | 'createdAt'>) => {
     const newVacation: Vacation = {
       ...vacation,
       id: crypto.randomUUID(),
       createdAt: new Date(),
     };
-    setVacations((prev) => [...prev, newVacation]);
+    const updated = [...vacations, newVacation];
+    setVacations(updated);
+    localStorage.setItem('vacations', JSON.stringify(updated));
   };
 
   const handleDeleteVacation = (id: string) => {
-    setVacations((prev) => prev.filter((v) => v.id !== id));
+    const updated = vacations.filter((v) => v.id !== id);
+    setVacations(updated);
+    localStorage.setItem('vacations', JSON.stringify(updated));
   };
 
   const handleUpdateVacation = (updatedVacation: Vacation) => {
-    setVacations((prev) =>
-      prev.map((v) => (v.id === updatedVacation.id ? updatedVacation : v))
-    );
+    const updated = vacations.map((v) => (v.id === updatedVacation.id ? updatedVacation : v));
+    setVacations(updated);
+    localStorage.setItem('vacations', JSON.stringify(updated));
   };
 
-  // Employee management handlers
   const handleUpdateEmployee = (updatedEmployee: Employee) => {
-    setEmployees((prev) =>
-      prev.map((e) => (e.id === updatedEmployee.id ? updatedEmployee : e))
-    );
+    setEmployees((prev) => prev.map((e) => (e.id === updatedEmployee.id ? updatedEmployee : e)));
   };
 
   const handleDeleteEmployee = (id: string) => {
     setEmployees((prev) => prev.filter((e) => e.id !== id));
-    // Also remove vacations for this employee
     setVacations((prev) => prev.filter((v) => v.employeeId !== id));
   };
 
   const handleAddEmployee = (employee: Omit<Employee, 'id'>) => {
-    const newEmployee: Employee = {
-      ...employee,
-      id: crypto.randomUUID(),
-    };
+    const newEmployee: Employee = { ...employee, id: crypto.randomUUID() };
     setEmployees((prev) => [...prev, newEmployee]);
   };
 
@@ -117,14 +99,18 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
       <main className="container mx-auto px-4 py-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-4">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Dashboard</h2>
             <p className="text-muted-foreground">Manage team vacations and leave</p>
           </div>
-          <AddVacationForm onAdd={handleAddVacation} />
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={migrateData} className="gap-2">
+               <CloudUpload className="h-4 w-4" /> Sync Employees
+            </Button>
+            <AddVacationForm onAdd={handleAddVacation} />
+          </div>
         </div>
 
         <StatsCards vacations={vacations} />
@@ -138,42 +124,34 @@ const Index = () => {
             <TabsTrigger value="teams" className="gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Team Overview</span>
-              <span className="sm:hidden">Teams</span>
             </TabsTrigger>
             <TabsTrigger value="timeline" className="gap-2">
               <GanttChart className="h-4 w-4" />
               <span className="hidden sm:inline">Timeline</span>
-              <span className="sm:hidden">Timeline</span>
             </TabsTrigger>
             <TabsTrigger value="calendar" className="gap-2">
               <CalendarDays className="h-4 w-4" />
               <span className="hidden sm:inline">Calendar</span>
-              <span className="sm:hidden">Cal</span>
             </TabsTrigger>
             <TabsTrigger value="list" className="gap-2">
               <List className="h-4 w-4" />
               <span className="hidden sm:inline">List View</span>
-              <span className="sm:hidden">List</span>
             </TabsTrigger>
             <TabsTrigger value="employees" className="gap-2">
               <Database className="h-4 w-4" />
               <span className="hidden sm:inline">Employees</span>
-              <span className="sm:hidden">DB</span>
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="teams" className="animate-fade-in">
             <TeamOverview vacations={filteredVacations} />
           </TabsContent>
-
           <TabsContent value="timeline" className="animate-fade-in">
             <TimelineView vacations={filteredVacations} />
           </TabsContent>
-
           <TabsContent value="calendar" className="animate-fade-in">
             <VacationCalendar vacations={filteredVacations} />
           </TabsContent>
-          
           <TabsContent value="list" className="animate-fade-in">
             <VacationList
               vacations={filteredVacations}
@@ -181,7 +159,6 @@ const Index = () => {
               onUpdate={handleUpdateVacation}
             />
           </TabsContent>
-
           <TabsContent value="employees" className="animate-fade-in">
             <EmployeeManagement
               employees={employees}
