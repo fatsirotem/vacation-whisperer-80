@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js';
 
 // Server-side Supabase client (use SERVICE_ROLE on server only)
 const supabaseUrl = process.env.SUPABASE_URL || '';
