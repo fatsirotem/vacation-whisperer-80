@@ -17,6 +17,17 @@ const Index = () => {
   // Add "|| []" to ensure it never stays undefined
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees || []); 
   const [vacations, setVacations] = useState<Vacation[]>(initialVacations || []);
+  const [vacations, setVacations] = useState<Vacation[]>([
+    {
+      id: '1',
+      employeeId: '1',
+      employeeName: 'Amit Rotem',
+      startDate: new Date(2026, 1, 17),
+      endDate: new Date(2026, 1, 23),
+      leaveType: 'vacation',
+      createdAt: new Date(),
+    }
+    ]);
 
   const [selectedTeam, setSelectedTeam] = useState<ScrumTeam | 'all'>('all');
 
