@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { format, differenceInDays, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, addMonths } from 'date-fns';
 import { Vacation, LeaveType } from '@/types/vacation';
 import { employees } from '@/data/employees';
@@ -8,6 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 
 interface TimelineViewProps {
   vacations: Vacation[];
@@ -21,10 +22,13 @@ const leaveColors: Record<LeaveType, string> = {
   rd: 'bg-leave-rd',
 };
 
+const periodOptions = [3, 6, 9, 12] as const;
+
 const TimelineView = ({ vacations }: TimelineViewProps) => {
+  const [monthsToShow, setMonthsToShow] = useState<number>(3);
   const today = new Date();
   const monthStart = startOfMonth(today);
-  const monthEnd = endOfMonth(addMonths(today, 2)); // Show 3 months
+  const monthEnd = endOfMonth(addMonths(today, monthsToShow - 1));
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const totalDays = days.length;
 
@@ -85,9 +89,23 @@ const TimelineView = ({ vacations }: TimelineViewProps) => {
 
   return (
     <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-      <div className="p-4 border-b">
-        <h3 className="font-semibold">Timeline View</h3>
-        <p className="text-sm text-muted-foreground">Next 3 months overview</p>
+      <div className="p-4 border-b flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold">Timeline View</h3>
+          <p className="text-sm text-muted-foreground">Next {monthsToShow} months overview</p>
+        </div>
+        <div className="flex gap-1">
+          {periodOptions.map((months) => (
+            <Button
+              key={months}
+              variant={monthsToShow === months ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setMonthsToShow(months)}
+            >
+              {months}M
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Month headers */}
