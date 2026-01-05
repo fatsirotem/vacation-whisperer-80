@@ -8,8 +8,13 @@ interface TimelineViewProps {
 
 const TimelineView = ({ vacations, employees }: TimelineViewProps) => {
   return (
-    <div className="p-8 border rounded-lg bg-card text-center text-muted-foreground">
-      Timeline connected to {employees.length} employees in cloud database.
+    <div className="bg-card rounded-lg border shadow-sm p-8 text-center">
+      <p className="text-muted-foreground">
+        Timeline View connected to {employees.length} team members.
+      </p>
+      <p className="text-sm text-muted-foreground mt-2">
+        Data is live from Supabase.
+      </p>
     </div>
   );
 };
