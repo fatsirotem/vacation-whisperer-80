@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Vite uses import.meta.env instead of process.env
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// This prevents the "Url is required" crash
+if (!supabaseUrl || !supabaseKey) {
+  console.error("CRITICAL: Supabase environment variables are missing in Vercel settings!")
+}
+
+export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder')
