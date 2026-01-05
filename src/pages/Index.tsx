@@ -15,9 +15,9 @@ import { CalendarDays, List, GanttChart, Users, Database } from 'lucide-react';
 
 const Index = () => {
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
-  const [vacations, setVacations] = useState<Vacation[]>([
+  const [vacations, setVacations] = useState<Vacation[]>(
     // Sample data - you can edit or delete these in the List View
-  ]);
+  );
 
   const [selectedTeam, setSelectedTeam] = useState<ScrumTeam | 'all'>('all');
 
