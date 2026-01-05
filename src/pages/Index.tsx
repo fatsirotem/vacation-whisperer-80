@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import AddVacationForm from '@/components/AddVacationForm';
 import VacationCalendar from '@/components/VacationCalendar';
@@ -14,20 +14,31 @@ import { employees as initialEmployees } from '@/data/employees';
 import { CalendarDays, List, GanttChart, Users, Database } from 'lucide-react';
 
 const Index = () => {
-  // Add "|| []" to ensure it never stays undefined
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees || []); 
-  
-  const [vacations, setVacations] = useState<Vacation[]>([
-    {
-      id: '1',
-      employeeId: '1',
-      employeeName: 'Amit Rotem',
-      startDate: new Date(2026, 1, 17),
-      endDate: new Date(2026, 1, 23),
-      leaveType: 'vacation',
-      createdAt: new Date(),
+  const [employees, setEmployees] = useState<Employee[]>(initialEmployees || []);
+  const [vacations, setVacations] = useState<Vacation[]>([]);
+
+  // Load vacations from localStorage once on client
+  useEffect(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('vacations') : null;
+      if (saved) {
+        setVacations(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Failed to load vacations from localStorage', e);
     }
-    ]);
+  }, []);
+
+  // Persist vacations to localStorage whenever they change
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('vacations', JSON.stringify(vacations));
+      }
+    } catch (e) {
+      console.error('Failed to save vacations to localStorage', e);
+    }
+  }, [vacations]);
 
   const [selectedTeam, setSelectedTeam] = useState<ScrumTeam | 'all'>('all');
 
