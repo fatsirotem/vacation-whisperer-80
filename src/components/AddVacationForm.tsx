@@ -85,7 +85,7 @@ const AddVacationForm = ({ onAdd, employees }: AddVacationFormProps) => {
                 <SelectItem value="parental">Parental Leave</SelectItem>
                 <SelectItem value="maternity">Maternity Leave</SelectItem>
                 <SelectItem value="exams">Exams</SelectItem>
-                <SelectItem value="rd">R&D Days</SelectItem>
+                <SelectItem value="rd">RD Days</SelectItem>
               </SelectContent>
             </Select>
           </div>
