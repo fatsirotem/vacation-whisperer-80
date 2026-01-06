@@ -5,6 +5,9 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
+  console.error("DEBUG - URL:", supabaseUrl ? "EXISTS" : "MISSING");
+  console.error("DEBUG - KEY:", supabaseKey ? "EXISTS" : "MISSING");
+  console.error("Full URL:", supabaseUrl);
   throw new Error("Supabase URL and Key are missing! Check Vercel Environment Variables.");
 }
 
