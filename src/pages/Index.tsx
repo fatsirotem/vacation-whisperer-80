@@ -23,11 +23,19 @@ const Index = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const { data: empData } = await supabase.from('employees').select('*').order('name');
-      if (empData) setEmployees(empData);
+      const { data: empData, error: empError } = await supabase.from('employees').select('*').order('name');
+      if (empError) {
+        console.error("Employees fetch error:", empError);
+        toast.error("Failed to load employees: " + empError.message);
+      } else if (empData) {
+        setEmployees(empData);
+      }
 
-      const { data: vacData } = await supabase.from('vacations').select('*');
-      if (vacData) {
+      const { data: vacData, error: vacError } = await supabase.from('vacations').select('*');
+      if (vacError) {
+        console.error("Vacations fetch error:", vacError);
+        toast.error("Failed to load vacations: " + vacError.message);
+      } else if (vacData) {
         const formatted = vacData.map(v => ({
           ...v,
           employeeId: v.employee_id,
@@ -40,6 +48,7 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Sync error:", error);
+      toast.error("Failed to load data");
     } finally {
       setIsLoading(false);
     }
@@ -56,8 +65,19 @@ const Index = () => {
       leave_type: vacation.leaveType,
       notes: vacation.notes
     }]);
+    if (error) {
+      console.error("Insert error:", error);
+      toast.error(error.message);
+    } else { 
+      toast.success("Saved!"); 
+      fetchData(); 
+    }
+  };
+
+  const handleDeleteVacation = async (id: string) => {
+    const { error } = await supabase.from('vacations').delete().eq('id', id);
     if (error) toast.error(error.message);
-    else { toast.success("Saved!"); fetchData(); }
+    else { toast.success("Deleted!"); fetchData(); }
   };
 
   const filteredVacations = vacations.filter((v) => {
