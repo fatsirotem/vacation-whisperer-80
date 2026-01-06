@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Vacation, Employee } from '@/types/vacation';
 import LeaveBadge from './LeaveBadge';
+import EditVacationDialog from './EditVacationDialog';
 
 interface VacationListProps {
   vacations: Vacation[];
@@ -45,7 +46,8 @@ const VacationList = ({ vacations, employees, onDelete, onUpdate }: VacationList
             <TableHead className="text-header-foreground font-semibold">Start Date</TableHead>
             <TableHead className="text-header-foreground font-semibold">End Date</TableHead>
             <TableHead className="text-header-foreground font-semibold">Type</TableHead>
-            <TableHead className="text-header-foreground font-semibold w-[100px]">Actions</TableHead>
+            <TableHead className="text-header-foreground font-semibold">Notes</TableHead>
+            <TableHead className="text-header-foreground font-semibold w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -71,15 +73,21 @@ const VacationList = ({ vacations, employees, onDelete, onUpdate }: VacationList
                 <TableCell>
                   <LeaveBadge type={vacation.leaveType} />
                 </TableCell>
+                <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
+                  {vacation.notes || '-'}
+                </TableCell>
                 <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(vacation.id)}
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <EditVacationDialog vacation={vacation} onUpdate={onUpdate} />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(vacation.id)}
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             );
