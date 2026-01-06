@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
-import { format, addMonths, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import { Vacation, Employee, ScrumTeam } from '@/types/vacation';
+import { format, addMonths, startOfMonth, endOfMonth, isWithinInterval, differenceInDays } from 'date-fns';
+import { Vacation, Employee, ScrumTeam, LeaveType } from '@/types/vacation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import LeaveBadge from './LeaveBadge';
+import { Badge } from '@/components/ui/badge';
 
 interface TimelineViewProps {
   vacations: Vacation[];
@@ -13,6 +13,23 @@ interface TimelineViewProps {
 type TimeRange = 3 | 6 | 9 | 12;
 
 const scrumTeams: ScrumTeam[] = ['LLU', 'PTB - GSNB', 'Port Cluster'];
+
+// Color mappings for leave types
+const leaveColors: Record<LeaveType, { bg: string; text: string }> = {
+  vacation: { bg: 'bg-blue-500', text: 'text-white' },
+  parental: { bg: 'bg-purple-500', text: 'text-white' },
+  maternity: { bg: 'bg-pink-500', text: 'text-white' },
+  exams: { bg: 'bg-orange-500', text: 'text-white' },
+  rd: { bg: 'bg-green-500', text: 'text-white' },
+};
+
+const leaveLabels: Record<LeaveType, string> = {
+  vacation: 'Vacation',
+  parental: 'Parental Leave',
+  maternity: 'Maternity Leave',
+  exams: 'Exams',
+  rd: 'R&D',
+};
 
 const TimelineView = ({ vacations, employees }: TimelineViewProps) => {
   const [timeRange, setTimeRange] = useState<TimeRange>(3);
@@ -55,7 +72,7 @@ const TimelineView = ({ vacations, employees }: TimelineViewProps) => {
           employeesWithVacations.some(emp => emp.id === v.employeeId)
         )
       };
-    }).filter(data => data.employees.length > 0); // Only show teams with vacations
+    }).filter(data => data.employees.length > 0);
   }, [filteredVacations, employees]);
 
   const totalDays = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -94,26 +111,12 @@ const TimelineView = ({ vacations, employees }: TimelineViewProps) => {
       <Card className="p-4">
         <div className="flex flex-wrap gap-4 items-center">
           <span className="font-semibold mr-2">Legend:</span>
-          <div className="flex items-center gap-2">
-            <LeaveBadge type="vacation" />
-            <span className="text-sm">Vacation</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <LeaveBadge type="parental" />
-            <span className="text-sm">Parental Leave</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <LeaveBadge type="maternity" />
-            <span className="text-sm">Maternity Leave</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <LeaveBadge type="exams" />
-            <span className="text-sm">Exams</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <LeaveBadge type="rd" />
-            <span className="text-sm">R&D Days</span>
-          </div>
+          {(Object.keys(leaveColors) as LeaveType[]).map(type => (
+            <div key={type} className="flex items-center gap-2">
+              <div className={`w-6 h-6 rounded ${leaveColors[type].bg}`}></div>
+              <span className="text-sm">{leaveLabels[type]}</span>
+            </div>
+          ))}
         </div>
       </Card>
 
@@ -160,18 +163,23 @@ const TimelineView = ({ vacations, employees }: TimelineViewProps) => {
                         const startOffset = ((vacStart.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) / totalDays * 100;
                         const width = ((vacEnd.getTime() - vacStart.getTime()) / (1000 * 60 * 60 * 24)) / totalDays * 100;
                         
+                        const days = differenceInDays(vacation.endDate, vacation.startDate) + 1;
+                        const colors = leaveColors[vacation.leaveType];
+                        
                         return (
                           <div
                             key={vacation.id}
-                            className="absolute h-7 flex items-center px-2 rounded shadow-sm"
+                            className={`absolute h-8 flex items-center justify-center px-2 rounded shadow-md ${colors.bg} ${colors.text} font-medium text-xs`}
                             style={{
                               left: `${startOffset}%`,
-                              width: `${Math.max(width, 2)}%`,
-                              top: `${idx * 32}px`,
+                              width: `${Math.max(width, 3)}%`,
+                              top: `${idx * 34}px`,
                             }}
-                            title={`${employee.name}: ${format(vacation.startDate, 'MMM d')} - ${format(vacation.endDate, 'MMM d')} ${vacation.notes ? `(${vacation.notes})` : ''}`}
+                            title={`${employee.name}: ${format(vacation.startDate, 'MMM d')} - ${format(vacation.endDate, 'MMM d, yyyy')} (${days} days)${vacation.notes ? `\n${vacation.notes}` : ''}`}
                           >
-                            <LeaveBadge type={vacation.leaveType} />
+                            <span className="truncate">
+                              {leaveLabels[vacation.leaveType]}
+                            </span>
                           </div>
                         );
                       })}
