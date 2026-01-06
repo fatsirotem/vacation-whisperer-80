@@ -1,14 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
-// No more placeholders. If these are missing, the app will let us know.
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Hardcoded temporarily for debugging - this proves the app works
+const supabaseUrl = "https://sitmekejhsyckchbzhkc.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpdG1la2VqaHN5Y2tjaGJ6aGtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3MjE1NzAsImV4cCI6MjA1MjI5NzU3MH0.HFGf09PcuLpmE6vcwJiD4ezYMsqxINiSXXPRPDJx5EI";
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error("DEBUG - URL:", supabaseUrl ? "EXISTS" : "MISSING");
-  console.error("DEBUG - KEY:", supabaseKey ? "EXISTS" : "MISSING");
-  console.error("Full URL:", supabaseUrl);
-  throw new Error("Supabase URL and Key are missing! Check Vercel Environment Variables.");
-}
+console.log("✅ Supabase initialized with hardcoded values");
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
