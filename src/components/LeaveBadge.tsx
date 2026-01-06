@@ -24,7 +24,7 @@ const leaveTypeConfig: Record<LeaveType, { label: string; className: string }> =
     className: 'bg-leave-exams text-white' 
   },
   rd: { 
-    label: 'R&D', 
+    label: 'RD', 
     className: 'bg-leave-rd text-white' 
   },
 };
